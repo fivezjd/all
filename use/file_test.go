@@ -1,12 +1,25 @@
 package use
 
 import (
-	"bufio"
-	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
+)
+
+/**
+ ** 文件信息的获取
+ **
+ **
+ ** 文件的增删改查
+ **
+ **
+ **
+ */
+
+import (
+	"bufio"
+	"io"
+	"runtime"
 )
 
 // 判断当前文件是否存在
