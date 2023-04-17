@@ -1,6 +1,9 @@
 package use
 
 import (
+	"bytes"
+	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -84,45 +87,253 @@ func TestAddStrB(t *testing.T) {
 }
 
 //s[i:j]：获取 s 中从第 i 个字符到第 j-1 个字符组成的子串。
-//
+/**
+字符串的截取
+*/
+
+// 获取字符串全部数据
+func TestAllStr(t *testing.T) {
+
+	// 英文
+	str := "abcdesf"
+	t.Log(str[:])
+
+	// 中文
+	strC := "中文"
+	t.Log(strC[:])
+
+	// 中文+英文
+	strMix := "中文abc"
+
+	t.Log(strMix[:])
+
+}
+
 //strings.Contains(s, substr string) bool：判断字符串 s 是否包含子串 substr。
 //
+
+func TestStrContains(t *testing.T) {
+	str := "abcdefs"
+	subStr := "de"
+	t.Log(strings.Contains(str, subStr))
+	// bool
+}
+
 //strings.HasPrefix(s, prefix string) bool：判断字符串 s 是否以 prefix 开头。
 //
+
+func TestHasPrefix(t *testing.T) {
+	str := "abcdeddkff"
+	t.Log(strings.HasPrefix(str, "ab"))
+}
+
 //strings.HasSuffix(s, suffix string) bool：判断字符串 s 是否以 suffix 结尾。
 //
+
+func TestHasSuffix(t *testing.T) {
+	str := "abcdeddkff"
+	t.Log(strings.HasSuffix(str, "kff"))
+}
+
 //strings.Index(s, sep string) int：查找字符串 s 中第一次出现子串 sep 的位置。
+// tips: 按字节来查找的
 //
+
+func TestIndex(t *testing.T) {
+	str := "abcdefghijklmn"
+	t.Log(strings.Index(str, "cd"))
+
+	// 测试中文
+	strC := "中文abc你好"
+	t.Log(strings.Index(strC, "你"))
+	// out: 9
+	// 在使用中文的时候应该注意
+}
+
+// 上面按字节来查找可能无法兼容rune,所以可以先将字符串转为[]rune 然后再获取查找到的子字符串索引
+
+func TestRuneStr(t *testing.T) {
+	// 测试中文
+	strC := "中文abc你好"
+
+	// search
+	strS := "你"
+	runeC := []rune(strC)
+
+	for i, v := range runeC {
+		if string(v) == strS {
+			t.Log(i)
+			break
+		}
+	}
+}
+
 //strings.LastIndex(s, sep string) int：查找字符串 s 中最后一次出现子串 sep 的位置。
 //
+
+func TestLastIndex(t *testing.T) {
+	str := "abcdefghijk"
+	t.Log(strings.LastIndexFunc(str, func(r rune) bool {
+		return string(r) == "i"
+	}))
+}
+
+func TestLastIndex1(t *testing.T) {
+	str := "abcde中国ghijk"
+	t.Log(strings.LastIndexFunc(str, func(r rune) bool {
+		return string(r) == "国"
+	}))
+}
+
+func TestLastIndex2(t *testing.T) {
+	str := "中国ABC哈哈"
+	t.Log(strings.IndexByte(str, 'A'))
+
+	t.Log(strings.IndexAny(str, "哈"))
+
+	t.Log(strings.IndexFunc(str, func(r rune) bool {
+		return string(r) == "国"
+	}))
+
+	t.Log(len(str))
+}
+
 //strings.Split(s, sep string) []string：将字符串 s 按照分隔符 sep 分割成多个子串，并返回一个字符串切片。
 //
+
+func TestSplit(t *testing.T) {
+	str := "a,b,c,d,e,f"
+	t.Log(strings.Split(str, ","))
+}
+
 //strings.Join(a []string, sep string) string：将字符串切片 a 按照分隔符 sep 连接成一个字符串。
 //
+
+func TestJoin(t *testing.T) {
+	str := []string{"a", "b", "c"}
+	t.Log(strings.Join(str, ","))
+}
+
 //strconv.Atoi(s string) (int, error)：将字符串 s 转换为 int 类型。
+
+// 字符串转为int  tips : 只能是数字字符串
+
+func TestAtoi(t *testing.T) {
+	str := "123"
+	v, err := strconv.Atoi(str)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(v)
+}
+
 //
 //strconv.ParseFloat(s string, bitSize int) (float64, error)：将字符串 s 转换为 float64 类型。
 //
+
+func TestParseFloat(t *testing.T) {
+	//s必须是数字字符串
+	str := "1234"
+	t.Log(strconv.ParseFloat(str, 64))
+}
+
 //strconv.FormatInt(i int64, base int) string：将 int64 类型的 i 转换为字符串。
+
+func TestFormatInt(t *testing.T) {
+	// strconv.FormatInt 函数的第二个参数指定了整数应该被表示成字符串的进制。
+	i := 123456677
+	t.Log(strconv.FormatInt(int64(i), 10))
+}
+
+// strconv.FormatFloat(f float64, fmt byte, prec int, bitSize int) string：将 float64 类型的 f 转换为字符串。
 //
-//strconv.FormatFloat(f float64, fmt byte, prec int, bitSize int) string：将 float64 类型的 f 转换为字符串。
+// 其中，参数 f 表示要转换的浮点数，参数 fmt 表示输出格式，取值范围为 'f', 'e', 'E', 'g', 'G'，
+// 分别表示小数格式、科学计数法格式、科学计数法格式（大写E）、根据实际情况自动选择格式、根据实际情况自动选择格式（大写G）；参数 prec 表示保留的小数位数；参数 bitSize 表示浮点数类型的位数，取值范围为 32 或 64。
+func TestFormatFloat(t *testing.T) {
+	t.Log(strconv.FormatFloat(3.1415926, 'f', 2, 64))
+}
+
 //
 //fmt.Sprintf(format string, a ...interface{}) string：将多个值格式化为字符串，类似于 C 语言中的 sprintf 函数。
+
+func TestSprintf(t *testing.T) {
+	t.Log(fmt.Sprintf("%s %s", "hello", "world"))
+}
+
 //
 //使用 strings.Builder 类型：strings.Builder 是 Golang 提供的一个专门用于字符串拼接的类型。它支持高效的字符串拼接操作，避免了每次创建新的字符串对象，从而提高了性能。可以使用 strings.Builder 的 WriteString 方法将多个字符串拼接起来。
+
+func TestBuilder(t *testing.T) {
+	var str strings.Builder
+	str.WriteString("字符串A")
+	str.WriteString("字符串B")
+	t.Log(str.String())
+}
+
 //
 //使用 bytes.Buffer 类型：bytes.Buffer 是 Golang 提供的一个类似于 strings.Builder 的类型。它也支持高效的字符串拼接操作，但是与 strings.Builder 不同的是，它可以处理二进制数据，而不仅仅是字符串。
-//
-//使用 fmt.Sprintf 函数：fmt.Sprintf 函数可以将多个值格式化为字符串，并返回一个字符串。可以使用这个函数来进行字符串拼接操作。
-//
+
+func TestBytesBuffer(t *testing.T) {
+	var b bytes.Buffer
+	b.WriteString("写入字符串")
+	// 写入字节数组
+	b.Write([]byte{65, 23, 4})
+	t.Log(b.String())
+	t.Log(b.Bytes())
+}
+
 //使用 strings.Join 函数：strings.Join 函数可以将一个字符串切片拼接成一个字符串，使用这个函数可以高效地进行字符串拼接操作。
+
+func TestStringsJoin(t *testing.T) {
+	p := []string{"ab", "cd", "ef", "gh"}
+	res := strings.Join(p, "+")
+	t.Log(res)
+	// output: ab+cd+ef+gh
+}
+
 //
 //以上是一些在 Golang 中高效进行字符串拼接的方法，其中使用 strings.Builder 和 bytes.Buffer 类型可以获得最好的性能。
 //
+
 //以下是 Golang 中常用的字符串处理官方包以及它们的主要功能点：
 //
 //strings 包：提供了许多字符串处理的基本函数，包括字符串拼接、替换、比较、截取、分割等。
-//
+
+//字符串替换
+
+func TestStringsReplace(t *testing.T) {
+	str := "中国 你好 你好"
+	t.Log(strings.Replace(str, "你好", "哈哈", 1))
+	// 替换全部可以指定n为-1
+	// 也可以使用下面的方法
+	t.Log(strings.ReplaceAll(str, "你好", "哈哈"))
+	// tips:替换不会在原字符串中操作，会返回一个新的字符串
+}
+
+//字符串的比较，比较字符串的大小
+
+func TestStringsCompare(t *testing.T) {
+	str1 := "acd"
+	str2 := "bcd"
+	com := strings.Compare(str1, str2)
+	if com == 0 {
+		t.Log("相等")
+	} else if com == 1 {
+		t.Log("大于")
+	} else {
+		t.Log("小于")
+	}
+}
+
+// 字符串的截取、分割
+// 常用方法，按指定分隔符分割成切片
+
+func TestSplitString(t *testing.T) {
+	str := "a,b,c,d,e,f,g,h,i,j"
+	t.Log(strings.Split(str, ","))
+	// 相反的方法 join
+}
+
 //strconv 包：提供了字符串和基本数据类型之间的相互转换函数，包括字符串转整型、浮点型、布尔型等，以及整型、浮点型、布尔型等转字符串的函数。
 //
 //regexp 包：提供了正则表达式的支持，可以用来进行字符串匹配、查找、替换等操作。
@@ -130,5 +341,27 @@ func TestAddStrB(t *testing.T) {
 //unicode 包：提供了 Unicode 字符集的支持，可以用来进行 Unicode 字符集的转换、查找、分类等操作。
 //
 //bytes 包：提供了对字节切片的操作，包括字节切片的拼接、替换、查找、截取等。
+
 //
 //bufio 包：提供了对缓冲区的支持，可以用来进行高效的文件读取和写入。
+
+//bufio 包是 Go 语言标准库中的一个包，提供了缓冲读写操作的支持。下面是 bufio 包中常用的一些功能：
+//
+//bufio.NewReader()：创建一个新的带有默认大小缓冲区的 Reader 对象，用于从输入源中读取数据。
+
+//
+//bufio.NewWriter()：创建一个新的带有默认大小缓冲区的 Writer 对象，用于向输出源中写入数据。
+//
+//bufio.NewReaderSize() 和 bufio.NewWriterSize()：分别创建具有指定缓冲区大小的 Reader 和 Writer 对象。
+//
+//bufio.Scanner()：创建一个 Scanner 对象，用于逐行读取输入源中的数据。
+//
+//bufio.Reader.Read()：从 Reader 对象中读取字节数据并将其存储到指定的字节数组中。
+//
+//bufio.Reader.ReadLine()：从 Reader 对象中读取一行文本数据。
+//
+//bufio.Writer.WriteString()：将指定的字符串写入到 Writer 对象的缓冲区中。
+//
+//bufio.Writer.Flush()：将 Writer 对象的缓冲区中的数据写入到输出源中。
+//
+//bufio 包中提供了缓冲读写操作的支持，可以提高读写操作的效率，并且可以更方便地进行数据读写和处理。通过使用 bufio 包，可以避免在读写操作中频繁调用底层系统调用造成的性能损失。
