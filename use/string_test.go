@@ -1,11 +1,17 @@
 package use
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -332,6 +338,9 @@ func TestSplitString(t *testing.T) {
 	str := "a,b,c,d,e,f,g,h,i,j"
 	t.Log(strings.Split(str, ","))
 	// 相反的方法 join
+
+	// 截取
+	t.Log(strings.Cut(str, ","))
 }
 
 //strconv 包：提供了字符串和基本数据类型之间的相互转换函数，包括字符串转整型、浮点型、布尔型等，以及整型、浮点型、布尔型等转字符串的函数。
@@ -339,8 +348,53 @@ func TestSplitString(t *testing.T) {
 //regexp 包：提供了正则表达式的支持，可以用来进行字符串匹配、查找、替换等操作。
 //
 //unicode 包：提供了 Unicode 字符集的支持，可以用来进行 Unicode 字符集的转换、查找、分类等操作。
+
+func TestUnicode(t *testing.T) {
+	// 判断字符是否被试字母
+	t.Log(unicode.IsLetter('A'))
+
+	// 转换字符大小写
+	t.Log(string(unicode.ToLower('A')))
+	t.Log(string(unicode.ToUpper('a')))
+
+	// 转换字符编码
+	// 转换为utf8编码
+	r := 'A'
+	buf := make([]byte, 4)
+	utf8.EncodeRune(buf, r)
+	t.Log(buf)
+
+	// 计算字节数
+	t.Log(len("hello,世界"))
+
+	// 计算字符数
+	t.Log(utf8.RuneCountInString("hello,世界"))
+
+	// 检查字符是否可打印
+	t.Log(unicode.IsPrint('A'))
+
+}
+
 //
 //bytes 包：提供了对字节切片的操作，包括字节切片的拼接、替换、查找、截取等。
+
+func TestBytes(t *testing.T) {
+	var b bytes.Buffer
+	b.WriteString("写入字符串")
+	t.Log(b.String())
+
+	data := []byte{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64}
+	var r bytes.Reader
+	r.Reset(data)
+	var buf [6]byte
+	n, err := r.Read(buf[:])
+	if err != nil {
+		return
+	}
+	t.Log(n)
+	t.Log(buf)
+
+}
 
 //
 //bufio 包：提供了对缓冲区的支持，可以用来进行高效的文件读取和写入。
@@ -349,12 +403,58 @@ func TestSplitString(t *testing.T) {
 //
 //bufio.NewReader()：创建一个新的带有默认大小缓冲区的 Reader 对象，用于从输入源中读取数据。
 
+func TestBufioNewReader(t *testing.T) {
+	_, filePath, _, _ := runtime.Caller(0)
+	currentDir := filepath.Dir(filePath)
+
+	file, _ := os.OpenFile(currentDir+"/tmp/tmp.log", os.O_RDONLY, 0644)
+	r := bufio.NewReader(file)
+	line, _, err := r.ReadLine()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(line)
+}
+
 //
 //bufio.NewWriter()：创建一个新的带有默认大小缓冲区的 Writer 对象，用于向输出源中写入数据。
+
+func TestBufioNewWriter(t *testing.T) {
+	_, filePath, _, _ := runtime.Caller(0)
+	currentDir := filepath.Dir(filePath)
+
+	file, _ := os.OpenFile(currentDir+"/tmp/tmp.log", os.O_RDWR, 0644)
+	r := bufio.NewWriter(file)
+	_, err := r.Write([]byte("addd"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second * 10)
+
+	// 返回已经缓存的字节数
+	t.Log(r.Buffered())
+
+	// 刷新缓存
+	r.Flush()
+
+	t.Log(r.Buffered())
+
+	//bufio.NewWriter 创建的缓冲区会在以下情况下自动刷新：
+	//
+	//当缓冲区已满时，调用写入方法会自动将缓冲区中的内容刷新到底层的 io.Writer 接口中。
+	//
+	//当调用 Flush 方法时，缓冲区中的内容会被强制刷新到底层的 io.Writer 接口中。
+	//
+	//当 bufio.NewWriter 关联的 io.Writer 对象被关闭时，缓冲区中的内容会被刷新到底层的 io.Writer 接口中。
+	//
+	//需要注意的是，在某些情况下，缓冲区中的内容可能并不会被立即刷新到底层的 io.Writer 接口中。例如，当使用文件作为底层的 io.Writer 接口时，由于文件缓冲机制的存在，缓冲区中的内容可能会在一定条件下才被刷新到磁盘中。因此，如果程序需要确保缓冲区中的内容能够及时刷新到底层的 io.Writer 接口中，可以在必要的时候手动调用 Flush 方法。
+}
+
 //
 //bufio.NewReaderSize() 和 bufio.NewWriterSize()：分别创建具有指定缓冲区大小的 Reader 和 Writer 对象。
 //
-//bufio.Scanner()：创建一个 Scanner 对象，用于逐行读取输入源中的数据。
+//bufio.Scanner()：创建一个 Scanner 对象，用于逐行读取输入源中的数据。一行一行读取数据
 //
 //bufio.Reader.Read()：从 Reader 对象中读取字节数据并将其存储到指定的字节数组中。
 //
