@@ -454,8 +454,25 @@ func TestBufioNewWriter(t *testing.T) {
 //
 //bufio.NewReaderSize() 和 bufio.NewWriterSize()：分别创建具有指定缓冲区大小的 Reader 和 Writer 对象。
 //
+
+func TestNewReaderSize(t *testing.T) {
+	// 指定缓冲区大小
+	_ = bufio.NewReaderSize(os.Stdin, 100)
+
+}
+
 //bufio.Scanner()：创建一个 Scanner 对象，用于逐行读取输入源中的数据。一行一行读取数据
 //
+
+// 逐行读取
+
+func TestScanner(t *testing.T) {
+	s := bufio.NewScanner(os.Stdin)
+	for s.Scan() {
+		t.Log(s.Text())
+	}
+}
+
 //bufio.Reader.Read()：从 Reader 对象中读取字节数据并将其存储到指定的字节数组中。
 //
 //bufio.Reader.ReadLine()：从 Reader 对象中读取一行文本数据。
