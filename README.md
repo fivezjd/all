@@ -269,6 +269,33 @@ func TestSleep(t *testing.T) {
 
 #### 日期格式化
 
+```
+/**
+字符串和时间的转换
+*/
+
+// 字符串转换为时间
+func TestStringToTime(t *testing.T) {
+	timeString := "2023-04-12 12:31:54"
+	parse, err := time.Parse(Format, timeString)
+	if err != nil {
+		return
+	}
+	t.Log(parse)
+}
+
+// 将字符串按指定的时区转换为时间
+
+func TestStringToTimeInLoc(t *testing.T) {
+	timeString := "2023-04-12 12:31:54"
+	parse, err := time.ParseInLocation(Format, timeString, time.Local)
+	if err != nil {
+		return
+	}
+	t.Log(parse)
+}
+```
+
 ## 字符串处理
 
 ## 文件处理
