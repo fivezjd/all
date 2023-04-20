@@ -1,4 +1,4 @@
-package use
+package _package
 
 import (
 	"os"

@@ -1,8 +1,9 @@
-package use
+package _package
 
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -467,6 +468,7 @@ func TestNewReaderSize(t *testing.T) {
 // 逐行读取
 
 func TestScanner(t *testing.T) {
+	flag.Parse()
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
 		t.Log(s.Text())
